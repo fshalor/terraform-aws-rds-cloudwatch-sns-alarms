@@ -50,25 +50,21 @@ It's 100% Open Source and licensed under the [APACHE2](LICENSE).
 See the [`examples/`](examples/) directory for working examples.
 
 ```hcl
-resource "aws_db_instance" "default" {
-  allocated_storage    = 10
-  storage_type         = "gp2"
-  engine               = "mysql"
-  engine_version       = "5.7"
-  instance_class       = "db.t2.micro"
-  identifier_prefix    = "rds-server-example"
-  name                 = "mydb"
-  username             = "foo"
-  password             = "foobarbaz"
-  parameter_group_name = "default.mysql5.7"
-  apply_immediately    = "true"
-  skip_final_snapshot  = "true"
+variable "rds_instances" {
+  description = "Rds Instances to Configure Alarms For as Key and Value is Property"
+  type = map
+  default = {
+    test-rds-instance = "WiggleWars"
+  }
 }
 
-module "rds_alarms" {
-  source         = "git::https://github.com/cloudposse/terraform-aws-rds-cloudwatch-sns-alarms.git?ref=tags/0.1.5"
-  db_instance_id = "${aws_db_instance.default.id}"
+module "dev_rds_alarms" {
+  source            = "../../Modules/terraform-aws-rds-cloudwatch-sns-alarms/"
+  db_instance_ids   = var.rds_instances
+  aws_sns_topic_arn = var.aws_sns_topic_Standard
+  environment = "DEV"
 }
+
 ```
 
 
@@ -89,71 +85,16 @@ module "rds_alarms" {
 
 ## Outputs
 
-| Name | Description |
-|------|-------------|
-| sns_topic_arn | The ARN of the SNS topic |
+Currently none. 0.12 sort of doesn't need them. The ideal outputs would be the CW alarms, but they're basically pounded all over the screen on apply, and not useful outside of the scope of the module. 
 
-## Makefile Targets
-```
-Available targets:
-
-  help                                This help screen
-  help/all                            Display help for all targets
-  lint                                Lint terraform code
-
-```
-
-
-
-## Related Projects
-
-Check out these related projects.
-
-- [terraform-aws-ec2-cloudwatch-sns-alarms](https://github.com/cloudposse/terraform-aws-ec2-cloudwatch-sns-alarms) - Terraform module that configures CloudWatch SNS alerts for EC2 instances
-- [terraform-aws-ecs-cloudwatch-sns-alarms](https://github.com/cloudposse/terraform-aws-ecs-cloudwatch-sns-alarms) - Terraform module for creating ECS service level alerts that go to an SNS endpoint
-- [terraform-aws-efs-cloudwatch-sns-alarms](https://github.com/cloudposse/terraform-aws-efs-cloudwatch-sns-alarms) - Terraform module that configures CloudWatch SNS alerts for EFS
-- [terraform-aws-elasticache-cloudwatch-sns-alarms](https://github.com/cloudposse/terraform-aws-elasticache-cloudwatch-sns-alarms) - Terraform module that configures CloudWatch SNS alerts for ElastiCache
-- [terraform-aws-lambda-cloudwatch-sns-alarms](https://github.com/cloudposse/terraform-aws-lambda-cloudwatch-sns-alarms) - Terraform module for creating a set of Lambda alarms and outputting to an endpoint
-- [terraform-aws-sqs-cloudwatch-sns-alarms](https://github.com/cloudposse/terraform-aws-sqs-cloudwatch-sns-alarms) - Terraform module for creating alarms for SQS and notifying endpoints
-
-
-
-## Help
-
-**Got a question?**
-
-File a GitHub [issue](https://github.com/cloudposse/terraform-aws-rds-cloudwatch-sns-alarms/issues), send us an [email][email] or join our [Slack Community][slack].
-
-## Commercial Support
-
-Work directly with our team of DevOps experts via email, slack, and video conferencing. 
-
-We provide [*commercial support*][commercial_support] for all of our [Open Source][github] projects. As a *Dedicated Support* customer, you have access to our team of subject matter experts at a fraction of the cost of a full-time engineer. 
-
-[![E-Mail](https://img.shields.io/badge/email-hello@cloudposse.com-blue.svg)](mailto:hello@cloudposse.com)
-
-- **Questions.** We'll use a Shared Slack channel between your team and ours.
-- **Troubleshooting.** We'll help you triage why things aren't working.
-- **Code Reviews.** We'll review your Pull Requests and provide constructive feedback.
-- **Bug Fixes.** We'll rapidly work to fix any bugs in our projects.
-- **Build New Terraform Modules.** We'll develop original modules to provision infrastructure.
-- **Cloud Architecture.** We'll assist with your cloud strategy and design.
-- **Implementation.** We'll provide hands-on support to implement our reference architectures. 
-
-
-## Community Forum
-
-Get access to our [Open Source Community Forum][slack] on Slack. It's **FREE** to join for everyone! Our "SweetOps" community is where you get to talk with others who share a similar vision for how to rollout and manage infrastructure. This is the best place to talk shop, ask questions, solicit feedback, and work together as a community to build *sweet* infrastructure.
 
 ## Contributing
 
 ### Bug Reports & Feature Requests
 
-Please use the [issue tracker](https://github.com/cloudposse/terraform-aws-rds-cloudwatch-sns-alarms/issues) to report any bugs or file feature requests.
+Please use the issue tracker above. 
 
 ### Developing
-
-If you are interested in being a contributor and want to get involved in developing this project or [help out](https://github.com/orgs/cloudposse/projects/3) with our other projects, we would love to hear from you! Shoot us an [email](mailto:hello@cloudposse.com).
 
 In general, PRs are welcome. We follow the typical "fork-and-pull" Git workflow.
 
@@ -165,9 +106,13 @@ In general, PRs are welcome. We follow the typical "fork-and-pull" Git workflow.
 
 **NOTE:** Be sure to merge the latest changes from "upstream" before making a pull request!
 
+**NOTE:** There is no intention of PRing this fork back into CloudPosse/origin. It's a derrived thing for a specific use case. 
+
 
 ## Copyright
 
+
+Copyright © 2019 [StackToSea](https://www.stacktosea.com)
 Copyright © 2017-2018 [Cloud Posse, LLC](https://cloudposse.com)
 
 
@@ -199,25 +144,15 @@ See [LICENSE](LICENSE) for full details.
 
 
 
-
-
-
-
 ## Trademarks
 
 All other trademarks referenced herein are the property of their respective owners.
 
 ## About
 
-This project is maintained and funded by [Cloud Posse, LLC][website]. Like it? Please let us know at <hello@cloudposse.com>
+I've gotta maintain props to the Cloudposse people. I've learned a lot from their code.
 
-[![Cloud Posse](https://cloudposse.com/logo-300x69.svg)](https://cloudposse.com)
-
-We're a [DevOps Professional Services][hire] company based in Los Angeles, CA. We love [Open Source Software](https://github.com/cloudposse/)!
-
-We offer paid support on all of our projects.  
-
-Check out [our other projects][github], [apply for a job][jobs], or [hire us][hire] to help with your cloud strategy and implementation.
+Check out Cloudposse if you use this or like this. Their stuff is good. 
 
   [docs]: https://docs.cloudposse.com/
   [website]: https://cloudposse.com/
@@ -233,12 +168,5 @@ Check out [our other projects][github], [apply for a job][jobs], or [hire us][hi
 
 ### Contributors
 
-|  [![Jamie Nelson][Jamie-BitFlight_avatar]][Jamie-BitFlight_homepage]<br/>[Jamie Nelson][Jamie-BitFlight_homepage] | [![Erik Osterman][osterman_avatar]][osterman_homepage]<br/>[Erik Osterman][osterman_homepage] |
-|---|---|
-
-  [Jamie-BitFlight_homepage]: https://github.com/Jamie-BitFlight
-  [Jamie-BitFlight_avatar]: https://github.com/Jamie-BitFlight.png?size=150
-  [osterman_homepage]: https://github.com/osterman
-  [osterman_avatar]: https://github.com/osterman.png?size=150
-
+ See the Original: 
 
